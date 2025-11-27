@@ -3,7 +3,7 @@
 
 Video chapters & logos es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
 
-* Inserta videos con un shortcode `[video_extends]`.
+* Inserta videos con un shortcode `[videos_chapters_logos]`.
 * Permite agregar un logo sobre el video.
 * Incluye marcadores de capítulos en el video.
 * Soporta atributos como autoplay, loop, ancho, alto y poster.
@@ -15,7 +15,7 @@ Video chapters & logos es un plugin ligero para WordPress que permite insertar v
 
 Video chapters & logos es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
 
-* Inserta videos con un shortcode `[video_extends]`.
+* Inserta videos con un shortcode `[videos_chapters_logos]`.
 * Permite agregar un logo sobre el video.
 * Incluye marcadores de capítulos en el video.
 * Soporta atributos como autoplay, loop, ancho, alto y poster.
