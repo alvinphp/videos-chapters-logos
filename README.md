@@ -1,7 +1,7 @@
 
 # Videos Chapters & Logos
 
-Video Extends es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
+Video chapters & logos es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
 
 * Inserta videos con un shortcode `[video_extends]`.
 * Permite agregar un logo sobre el video.
@@ -13,7 +13,7 @@ Video Extends es un plugin ligero para WordPress que permite insertar videos MP4
 
 # instalación 
 
-Video Extends es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
+Video chapters & logos es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
 
 * Inserta videos con un shortcode `[video_extends]`.
 * Permite agregar un logo sobre el video.
