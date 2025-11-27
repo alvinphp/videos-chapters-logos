@@ -1,0 +1,57 @@
+
+.headervideo-extends h1 {
+    font-family: 'Arial', sans-serif; /* Tipo de letra */
+    font-size: 32px; /* Tamaño de letra */
+    color: #333; /* Color de texto */
+    text-align: center; /* Alineación del texto */
+    margin-top: 20px; /* Espaciado superior */
+}
+
+/* Estilo para los subencabezados */
+.content h2 {
+    font-family: 'Arial', sans-serif; /* Tipo de letra */
+    font-size: 24px; /* Tamaño de letra */
+    color: #555; /* Color de texto */
+    margin-top: 30px; /* Espaciado superior */
+}
+
+/* Estilo para los párrafos en la documentación */
+.content p {
+    font-family: 'Verdana', sans-serif; /* Tipo de letra */
+    font-size: 16px; /* Tamaño de letra */
+    color: #444; /* Color de texto */
+    line-height: 1.5; /* Espaciado entre líneas */
+    margin-bottom: 20px; /* Espaciado inferior */
+}
+
+/* Estilo para los bloques de código */
+.content pre {
+    font-family: 'Courier New', monospace; /* Tipo de letra */
+    font-size: 14px; /* Tamaño de letra */
+    background-color: #f4f4f4; /* Color de fondo */
+    padding: 10px; /* Espaciado interior */
+    border-radius: 5px; /* Bordes redondeados */
+    overflow-x: auto; /* Habilitar desplazamiento horizontal si el código es largo */
+}
+
+/* Estilo para los enlaces */
+.content a {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    color: #0073aa; /* Color de enlace */
+    text-decoration: none; /* Elimina el subrayado por defecto */
+}
+
+.content a:hover {
+    color: #005177; /* Color de enlace cuando se pasa el ratón */
+    text-decoration: underline; /* Subrayar al pasar el ratón */
+}
+
+/*estilos para video*/
+
+video.video-custom {
+    border-radius: 12px; /* Bordes redondeados */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    border: 2px solid #ddd; /* Borde gris claro */
+    overflow: hidden; /* Asegura que los controles sigan la forma */
+}
