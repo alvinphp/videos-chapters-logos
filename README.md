@@ -1,5 +1,5 @@
 
-# video-extends 
+# Videos Chapters & Logos
 
 Video Extends es un plugin ligero para WordPress que permite insertar videos MP4 en tus páginas o entradas, con las siguientes funcionalidades:
 
