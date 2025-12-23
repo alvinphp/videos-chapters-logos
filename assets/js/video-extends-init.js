@@ -1,7 +1,8 @@
 (function($) {
     $(function() {
-        if (typeof videoExtendsData !== 'undefined' && Array.isArray(videoExtendsData)) {
-            videoExtendsData.forEach(function(video) {
+         
+        if (typeof vidchlog_videoExtendsData !== 'undefined' && Array.isArray(vidchlog_videoExtendsData)) {
+            vidchlog_videoExtendsData.forEach(function(video) {
                 var $el = $('#' + video.videoId);
 
                 if ($el.length && typeof $el.videoExtend === 'function') {
@@ -14,7 +15,7 @@
                 }
             });
         } else {
-            console.warn('videoExtendsData is not defined or invalid.');
+            console.warn('');
         }
     });
 })(jQuery);
