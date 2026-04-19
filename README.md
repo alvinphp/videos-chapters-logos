@@ -1,15 +1,3 @@
-# 🎬 Videos Chapters & Logos
-
-**Contributors:** alvingil  
-**Tags:** chapters, logo, mp4, video player, markers  
-**Requires at least:** 5.0  
-**Tested up to:** 6.9  
-**Stable tag:** 1.0  
-**License:** GPLv2 or later  
-**License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
-
----
-
 ## 📌 Description
 
 The "Videos Chapters & Logos" plugin allows you to embed MP4 videos with a logo, poster, and markers on your WordPress site.
