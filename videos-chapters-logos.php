@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once plugin_dir_path( __FILE__ ) . 'functions/functions.php';
+require_once plugin_dir_path( __FILE__ ) . 'functions/enqueue.php';
 
 // quitar espacio del shortcode general.
 add_filter(
@@ -59,20 +60,37 @@ add_filter( 'the_content', 'vidchlog_force_video_inline', 5 );
 function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	static $video_count = 0;
 	++$video_count;
-
+ //=================================================================================
 	wp_enqueue_script(
-		'videoextendJs',
-		plugins_url( 'assets/js/jquery.video-extend.js', __FILE__ ),
-		array( 'jquery' ),
-		'1.0',
-		true
+	  'videoJs',
+	  plugins_url( 'assets/js/video.min.js', __FILE__ ),
+	  array(),
+	  '1.0',
+	  true
 	);
+	wp_enqueue_script(
+	  'videologo',
+	  plugins_url( 'assets/js/videojs-logo.min.js', __FILE__ ),
+	  array( 'videoJs' ),
+	  '1.0',
+	  true
+	);
+	wp_enqueue_script(
+	  'videomarker',
+	  plugins_url( 'assets/js/videojs-markers.js', __FILE__ ),
+	  array( 'jquery', 'videoJs' ),
+	  '1.0',
+	  true
+	);
+ //====================================================================================
 
+
+	
 	$atts = shortcode_atts(
 		array(
 			'video'    => 'Sintel.mp4',
-			'logo'     => 'example_logo.png',
-			'poster'   => 'poster.png',
+			'logo'     => 'logo.png',
+			'poster'   => 'sintel.jpg',
 			'width'    => '640',
 			'height'   => '360',
 			'autoplay' => 'false',
@@ -115,12 +133,13 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	$video_attrs .= $loop ? ' loop' : '';
 
 	wp_enqueue_script(
-		'video-extends-init',
-		plugins_url( 'assets/js/video-extends-init.js', __FILE__ ),
-		array( 'jquery', 'videoextendJs' ),
-		'1.0',
-		true
-	);
+	'video-extends-init',
+	plugins_url( 'assets/js/video-extends-init.js', __FILE__ ),
+	array( 'videoJs', 'videologo', 'videomarker' ),
+	'1.0',
+	true
+);
+
 
 	$markers_array = array();
 	if ( ! empty( $atts['markers'] ) ) {
@@ -175,8 +194,8 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	);
 
 	ob_start(); ?>
-<div class="container">
-	<video class="video-custom" 
+
+	<video class=" video-js vjs-fluid " 
 			id="<?php echo esc_attr( $atts['id'] ); ?>"
 			width="<?php echo esc_attr( $atts['width'] ); ?>" 
 			height="<?php echo esc_attr( $atts['height'] ); ?>"
@@ -184,7 +203,7 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 			controls <?php echo esc_attr( $video_attrs ); ?>>
 			<source src="<?php echo esc_url( $video_url ); ?>" type="video/mp4">
 	</video>
-</div>
+
 	<?php
 	return ob_get_clean();
 }
