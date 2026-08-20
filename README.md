@@ -59,7 +59,6 @@ No, only MP4 is supported.
 
 ## 📝 Changelog
 
-1.0
 - Initial release
 - MP4 video support
 - Logo overlay
@@ -71,6 +70,9 @@ No, only MP4 is supported.
 
 1.0
 First stable version.
+
+1.1
+Adaptation of the Video.js library
 
 ---
 
