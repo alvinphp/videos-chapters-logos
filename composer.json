@@ -1,0 +1,11 @@
+{
+    "require-dev": {
+        "wp-coding-standards/wpcs": "*",
+        "phpunit/phpunit": "^12.5"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
