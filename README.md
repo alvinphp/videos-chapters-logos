@@ -9,7 +9,6 @@ With this plugin you can:
 - Create chapter markers inside the video timeline  
 - Allow users to click markers to jump to specific timestamps  
 
-⚠️ Important: MP4 videos must be placed inside the `assets/video/` folder of the plugin.
 
 ---
 
