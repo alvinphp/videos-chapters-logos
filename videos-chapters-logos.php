@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Videos Chapters & Logos
  * Description: Plugin that displays an MP4 video with a logo and markers.
- * Version: 1.0
+ * Version: 1.2
  * Author: alvingil
  * Text Domain: videos-chapters-logos
  * Domain Path: /languages
@@ -16,205 +16,258 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+
+/*
+ * Cargar archivos del plugin.
+ */
 require_once plugin_dir_path( __FILE__ ) . 'functions/functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'functions/enqueue.php';
+require_once plugin_dir_path( __FILE__ ) . 'functions/database.php';
+require_once plugin_dir_path( __FILE__ ) . 'admin/panel.php';
 
-// quitar espacio del shortcode general.
-add_filter(
-	'the_content',
-	function ( $content ) {
-		return preg_replace_callback(
-			'/\[videos_chapters_logos.*?\]/s',
-			function ( $matches ) {
-				return vidchlog_clean_shortcode_full( $matches[0] );
-			},
-			$content
-		);
-	}
+/*
+ * Crear las tablas al activar el plugin.
+ */
+register_activation_hook(
+	__FILE__,
+	'vidchlog_crear_tablas'
 );
 
-add_filter(
-	'the_content',
-	function ( $content ) {
-		$content = preg_replace( '/<p>\s*(\[videos_chapters_logos[^\]]*\])\s*<\/p>/i', '$1', $content );
-		return $content;
-	}
-);
 
-add_filter( 'the_content', 'vidchlog_force_video_inline', 5 );
+/*
+ * Procesar eliminación de videos.
+ */
+add_action(
+	'admin_post_vidchlog_delete_video',
+	'vidchlog_procesar_delete_video'
+);
 
 /**
- * Shortcode para insertar un video MP4 con opciones de personalización.
+ * Shortcode para mostrar un video.
  *
- * Este shortcode genera el HTML necesario para insertar un video MP4 en una página
- * de WordPress, permitiendo a los usuarios personalizar si el video está en loop,
- * si tiene los controles, y si está en mute. También acepta una URL de video.
+ * Uso:
+ * [videos_chapters_logos id="5"]
  *
- * @param array $atts Atributos pasados al shortcode. Los atributos disponibles son:
- *                    - url: La URL del video MP4.
- *                    - loop: Si el video debe repetirse en bucle (opcional).
- *                    - muted: Si el video debe estar en silencio (opcional).
- *                    - controls: Si el video debe mostrar los controles (opcional).
- * @return string El HTML para mostrar el video con los atributos especificados.
+ * @param array $atts Atributos del shortcode.
+ * @return string HTML del reproductor.
  */
 function vidchlog_videos_chapters_logos_shortcode( $atts ) {
-	static $video_count = 0;
-	++$video_count;
- //=================================================================================
+	/*
+	 * Cargar los js del las marcaciones y logo.
+	 */
+	// =================================================================================
 	wp_enqueue_script(
-	  'videoJs',
-	  plugins_url( 'assets/js/video.min.js', __FILE__ ),
-	  array(),
-	  '1.0',
-	  true
+		'videoJs',
+		plugins_url( 'assets/js/video.min.js', __FILE__ ),
+		array(),
+		'1.0',
+		true
 	);
 	wp_enqueue_script(
-	  'videologo',
-	  plugins_url( 'assets/js/videojs-logo.min.js', __FILE__ ),
-	  array( 'videoJs' ),
-	  '1.0',
-	  true
+		'videologo',
+		plugins_url( 'assets/js/videojs-logo.min.js', __FILE__ ),
+		array( 'videoJs' ),
+		'1.0',
+		true
 	);
 	wp_enqueue_script(
-	  'videomarker',
-	  plugins_url( 'assets/js/videojs-markers.js', __FILE__ ),
-	  array( 'jquery', 'videoJs' ),
-	  '1.0',
-	  true
+		'videomarker',
+		plugins_url( 'assets/js/videojs-markers.js', __FILE__ ),
+		array( 'jquery', 'videoJs' ),
+		'1.0',
+		true
 	);
- //====================================================================================
+	wp_enqueue_script(
+		'video-extends-init',
+		plugins_url( 'assets/js/video-extends-init.js', __FILE__ ),
+		array( 'videoJs', 'videologo', 'videomarker' ),
+		'1.0',
+		true
+	);
+	// ==============================================================================
 
-
-	
+	/*
+	 * obteniendo id para el shortcode
+	 */
 	$atts = shortcode_atts(
 		array(
-			'video'    => 'Sintel.mp4',
-			'logo'     => 'logo.png',
-			'poster'   => 'sintel.jpg',
-			'width'    => '640',
-			'height'   => '360',
-			'autoplay' => 'false',
-			'loop'     => 'false',
-			'markers'  => '',
-			'id'       => '',
+			'id' => '',
 		),
-		$atts
+		$atts,
+		'videos_chapters_logos'
 	);
 
-	$marcadores = vidchlog_parse_markers_string( $atts['markers'] );
+	/*
+	 * Obtener el ID del video.
+	 */
+	$idvideo = absint( $atts['id'] );
 
-	$atts['video']    = sanitize_file_name( $atts['video'] );
-	$atts['logo']     = sanitize_file_name( $atts['logo'] );
-	$atts['poster']   = sanitize_file_name( $atts['poster'] );
-	$atts['width']    = intval( $atts['width'] );
-	$atts['height']   = intval( $atts['height'] );
-	$atts['autoplay'] = filter_var( $atts['autoplay'], FILTER_VALIDATE_BOOLEAN );
-	$atts['loop']     = filter_var( $atts['loop'], FILTER_VALIDATE_BOOLEAN );
-
-	if ( ! file_exists( plugin_dir_path( __FILE__ ) . 'assets/video/' . $atts['video'] ) ) {
-		return '<p>' . __( 'Video not found.', 'videos-chapters-logos' ) . '</p>';
+	if ( ! $idvideo ) {
+		return '<p>' . esc_html__(
+			'Video no válido.',
+			'videos-chapters-logos'
+		) . '</p>';
 	}
 
-	if ( empty( $atts['id'] ) ) {
-		$atts['id'] = 'video_' . $video_count . '_' . uniqid();
+	/*
+	 * Obtener el video desde la base de datos.
+	 */
+	$video = vidchlog_get_video_by_id( $idvideo );
+
+	if ( ! $video ) {
+		return '<p>' . esc_html__(
+			'Video no encontrado.',
+			'videos-chapters-logos'
+		) . '</p>';
 	}
 
-	$video_url  = plugins_url( 'assets/video/' . $atts['video'], __FILE__ );
-	$logo_url   = plugins_url( 'assets/img/' . $atts['logo'], __FILE__ );
-	$poster_url = plugins_url( 'assets/img/' . $atts['poster'], __FILE__ );
+	/*
+	 * Sanitizar nombres de archivos.
+	 */
+	$video_file  = sanitize_file_name( $video->video );
+	$logo_file   = sanitize_file_name( $video->logo );
+	$poster_file = sanitize_file_name( $video->poster );
 
-	$autoplay = $atts['autoplay'];
-	$loop     = $atts['loop'];
-	$muted    = $autoplay;
+	/*
+	 * Ruta física del archivo de video.
+	 */
+	$video_path = plugin_dir_path( __FILE__ )
+		. 'assets/video/'
+		. $video_file;
 
+	/*
+	 * Verificar que el video exista.
+	 */
+	if ( ! file_exists( $video_path ) ) {
+		return '<p>' . esc_html__(
+			'Video not found.',
+			'videos-chapters-logos'
+		) . '</p>';
+	}
+
+	/*
+	 * Crear URLs.
+	 */
+	$video_url = plugins_url(
+		'assets/video/' . $video_file,
+		__FILE__
+	);
+
+	$logo_url = plugins_url(
+		'assets/img/' . $logo_file,
+		__FILE__
+	);
+
+	$poster_url = plugins_url(
+		'assets/img/' . $poster_file,
+		__FILE__
+	);
+
+	/*
+	 * Obtener configuración desde la base de datos.
+	 */
+	$autoplay = (bool) $video->autoplay;
+	$muted    = (bool) $video->muted;
+	$loop     = (bool) $video->loop_video;
+
+	/*
+	 * Crear atributos del elemento <video>.
+	 */
 	$video_attrs  = '';
 	$video_attrs .= $autoplay ? ' autoplay' : '';
 	$video_attrs .= $muted ? ' muted' : '';
 	$video_attrs .= $loop ? ' loop' : '';
 
-	wp_enqueue_script(
-	'video-extends-init',
-	plugins_url( 'assets/js/video-extends-init.js', __FILE__ ),
-	array( 'videoJs', 'videologo', 'videomarker' ),
-	'1.0',
-	true
-);
+	/*
+	 * Obtener las marcaciones del video.
+	 */
+	$markers_array = vidchlog_get_markers_by_video( $idvideo );
 
-
-	$markers_array = array();
-	if ( ! empty( $atts['markers'] ) ) {
-		$markers_list = explode( ',', $atts['markers'] );
-		foreach ( $markers_list as $marker ) {
-			if ( strpos( $marker, '=' ) !== false ) {
-				list($time, $text) = explode( '=', $marker, 2 );
-				$markers_array[]   = array(
-					'time' => vidchlog_convert_to_seconds( trim( $time ) ),
-					'text' => trim( $text ),
-				);
-			}
-		}
-	}
-
-	if ( empty( $markers_array ) ) {
-		$markers_array = array(
-			array(
-				'time' => vidchlog_convert_to_seconds( '0:39' ),
-				'text' => __( 'Chapter 1', 'videos-chapters-logos' ),
-			),
-			array(
-				'time' => vidchlog_convert_to_seconds( '5:50' ),
-				'text' => __( 'Chapter 2', 'videos-chapters-logos' ),
-			),
-			array(
-				'time' => vidchlog_convert_to_seconds( '7:50' ),
-				'text' => __( 'Chapter 3', 'videos-chapters-logos' ),
-			),
-			array(
-				'time' => vidchlog_convert_to_seconds( '11:17' ),
-				'text' => __( 'Chapter 4', 'videos-chapters-logos' ),
-			),
-		);
-	}
-
+	/*
+	 * Preparar las marcaciones para JavaScript.
+	 */
 	global $vidchlog_videos_data;
+
+	if ( ! isset( $vidchlog_videos_data ) ) {
+		$vidchlog_videos_data = array();
+	}
+
 	$escaped_markers = array();
+
 	if ( is_array( $markers_array ) && ! empty( $markers_array ) ) {
+
 		foreach ( $markers_array as $marker ) {
+
 			$escaped_markers[] = array(
-				'time' => intval( $marker['time'] ),
-				'text' => esc_js( sanitize_text_field( $marker['text'] ) ),
+				'time' => intval( $marker['tiempo'] ),
+				'text' => esc_js(
+					sanitize_text_field(
+						$marker['titulo']
+					)
+				),
 			);
 		}
 	}
 
+	/*
+	 * Guardar los datos del video
+	 * para enviarlos a JavaScript.
+	 */
 	$vidchlog_videos_data[] = array(
-		'videoId' => $atts['id'],
+		'videoId' => 'video_' . $idvideo,
 		'logoUrl' => esc_url( $logo_url ),
 		'markers' => $escaped_markers,
 	);
 
-	ob_start(); ?>
+	/*
+	 * Generar HTML del reproductor.
+	 */
+	ob_start();
+	?>
 
-	<video class=" video-js vjs-fluid " 
-			id="<?php echo esc_attr( $atts['id'] ); ?>"
-			width="<?php echo esc_attr( $atts['width'] ); ?>" 
-			height="<?php echo esc_attr( $atts['height'] ); ?>"
-			poster="<?php echo esc_url( $poster_url ); ?>"
-			controls <?php echo esc_attr( $video_attrs ); ?>>
-			<source src="<?php echo esc_url( $video_url ); ?>" type="video/mp4">
+	<video
+		class="video-js vjs-fluid"
+		id="<?php echo esc_attr( 'video_' . $idvideo ); ?>"
+		poster="<?php echo esc_url( $poster_url ); ?>"
+		controls<?php echo esc_attr( $video_attrs ); ?>
+	>
+		<source
+			src="<?php echo esc_url( $video_url ); ?>"
+			type="video/mp4"
+		>
 	</video>
 
 	<?php
+
 	return ob_get_clean();
 }
-add_shortcode( 'videos_chapters_logos', 'vidchlog_videos_chapters_logos_shortcode' );
 
+
+/*
+ * Registrar el shortcode.
+ */
+add_shortcode(
+	'videos_chapters_logos',
+	'vidchlog_videos_chapters_logos_shortcode'
+);
+
+
+/*
+ * Pasar los datos de PHP a JavaScript.
+ */
 add_action(
 	'wp_footer',
 	function () {
+
 		global $vidchlog_videos_data;
+
 		if ( ! empty( $vidchlog_videos_data ) ) {
-			wp_localize_script( 'video-extends-init', 'vidchlog_videoExtendsData', $vidchlog_videos_data );
+
+			wp_localize_script(
+				'video-extends-init',
+				'vidchlog_videoExtendsData',
+				$vidchlog_videos_data
+			);
 		}
 	}
 );
