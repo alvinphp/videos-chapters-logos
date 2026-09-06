@@ -48,6 +48,7 @@ First stable version.
 
 1.1
 Adaptation of the Video.js library
+
 1.2
 Plugin structural changes
 
