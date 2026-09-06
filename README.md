@@ -9,7 +9,6 @@ With this plugin you can:
 - Create chapter markers inside the video timeline  
 - Allow users to click markers to jump to specific timestamps  
 
-⚠️ Important: MP4 videos must be placed inside the `assets/video/` folder of the plugin.
 
 ---
 
@@ -22,38 +21,13 @@ With this plugin you can:
    - Go to Plugins
    - Click Activate on “Videos Chapters & Logos”
 
-3. Use the shortcode:
 
-[videos_chapters_logos video="Sintel.mp4" logo="logo.png" poster="poster.png" width="800" height="450" autoplay="false" loop="true" markers="0:39=Introduction,5:50=Chapter 2,7:50=Chapter 3,9:00=Chapter 4"]
 
 ---
 
-## 🧩 Shortcode Parameters
+## 🧩 Video Tutorial
+[Ver video tutorial del plugin](https://www.youtube.com/watch?v=cYan9zYTYMM)
 
-video → MP4 file name (default: Sintel.mp4)  
-logo → Logo image file  
-poster → Poster image file  
-width → Video width (default: 640)  
-height → Video height (default: 360)  
-autoplay → true / false  
-loop → true / false  
-markers → Chapter markers in format time=text  
-
-Example:
-0:39=Introduction,5:50=Chapter 2,7:50=Chapter 3
-
----
-
-## ❓ Frequently Asked Questions
-
-How do I add multiple markers?
-0:39=Intro,5:50=Chapter 2,7:50=Chapter 3,9:00=Chapter 4
-
-Can I customize the size?
-Yes, using width and height attributes.
-
-Can I use formats other than MP4?
-No, only MP4 is supported.
 
 ---
 
@@ -73,6 +47,9 @@ First stable version.
 
 1.1
 Adaptation of the Video.js library
+
+1.2
+Plugin structural changes
 
 ---
 
