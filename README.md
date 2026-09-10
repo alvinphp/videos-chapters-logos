@@ -27,6 +27,7 @@ With this plugin you can:
 
 ## 🧩 Video Tutorial
 [Video tutorial](https://www.youtube.com/watch?v=cYan9zYTYMM)
+
 [Widget tutorial](https://www.youtube.com/watch?v=ctHP-u0hxIo)
 
 
