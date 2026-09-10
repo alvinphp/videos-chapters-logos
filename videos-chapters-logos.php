@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Videos Chapters & Logos
  * Description: Plugin that displays an MP4 video with a logo and markers.
- * Version: 1.2
+ * Version: 1.3
  * Author: alvingil
  * Text Domain: videos-chapters-logos
  * Domain Path: /languages
@@ -24,6 +24,7 @@ require_once plugin_dir_path( __FILE__ ) . 'functions/functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'functions/enqueue.php';
 require_once plugin_dir_path( __FILE__ ) . 'functions/database.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/panel.php';
+require_once plugin_dir_path( __FILE__ ) . 'widget/class-vidchlog-video-widget.php';
 
 /*
  * Crear las tablas al activar el plugin.
@@ -52,6 +53,10 @@ add_action(
  * @return string HTML del reproductor.
  */
 function vidchlog_videos_chapters_logos_shortcode( $atts ) {
+	// variable contadora para el id unico.
+	static $video_count = 0;
+	++$video_count;
+
 	/*
 	 * Cargar los js del las marcaciones y logo.
 	 */
@@ -91,7 +96,8 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	 */
 	$atts = shortcode_atts(
 		array(
-			'id' => '',
+			'id'     => '',
+			'unique' => 'default',
 		),
 		$atts,
 		'videos_chapters_logos'
@@ -101,6 +107,8 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	 * Obtener el ID del video.
 	 */
 	$idvideo = absint( $atts['id'] );
+	// id unico.
+	$unique = sanitize_html_class( $atts['unique'] );
 
 	if ( ! $idvideo ) {
 		return '<p>' . esc_html__(
@@ -124,9 +132,10 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	/*
 	 * Sanitizar nombres de archivos.
 	 */
-	$video_file  = sanitize_file_name( $video->video );
-	$logo_file   = sanitize_file_name( $video->logo );
-	$poster_file = sanitize_file_name( $video->poster );
+	$unique_dom_id = 'video_' . $idvideo . '_' . $video_count . '_' . uniqid();
+	$video_file    = sanitize_file_name( $video->video );
+	$logo_file     = sanitize_file_name( $video->logo );
+	$poster_file   = sanitize_file_name( $video->poster );
 
 	/*
 	 * Ruta física del archivo de video.
@@ -214,7 +223,7 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	 * para enviarlos a JavaScript.
 	 */
 	$vidchlog_videos_data[] = array(
-		'videoId' => 'video_' . $idvideo,
+		'videoId' => $unique_dom_id,
 		'logoUrl' => esc_url( $logo_url ),
 		'markers' => $escaped_markers,
 	);
@@ -227,7 +236,7 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 
 	<video
 		class="video-js vjs-fluid"
-		id="<?php echo esc_attr( 'video_' . $idvideo ); ?>"
+		id="<?php echo esc_attr( $unique_dom_id ); ?>"
 		poster="<?php echo esc_url( $poster_url ); ?>"
 		controls<?php echo esc_attr( $video_attrs ); ?>
 	>
