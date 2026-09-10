@@ -27,6 +27,7 @@ With this plugin you can:
 
 ## 🧩 Video Tutorial
 [Video tutorial](https://www.youtube.com/watch?v=cYan9zYTYMM)
+[Widget tutorial](https://www.youtube.com/watch?v=ctHP-u0hxIo)
 
 
 ---
@@ -46,10 +47,14 @@ With this plugin you can:
 First stable version.
 
 1.1
-Adaptation of the Video.js library
+Adaptation of the Video.js library.
 
 1.2
-Plugin structural changes
+Plugin structural changes.
+
+1.3
+Added widget support.
+
 
 ---
 
