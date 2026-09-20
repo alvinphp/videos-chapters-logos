@@ -57,7 +57,7 @@ Plugin structural changes.
 Added widget support.
 
 1.4
-Add styles to the video player skin.
+Added styles to the video player skin.
 
 
 
