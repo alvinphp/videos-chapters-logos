@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Videos Chapters & Logos
  * Description: Plugin that displays an MP4 video with a logo and markers.
- * Version: 1.3
+ * Version: 1.4
  * Author: alvingil
  * Text Domain: videos-chapters-logos
  * Domain Path: /languages
@@ -235,7 +235,7 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 	?>
 
 	<video
-		class="video-js vjs-fluid"
+		class="video-js vjs-fluid <?php echo esc_attr( $video->estilo ); ?>"
 		id="<?php echo esc_attr( $unique_dom_id ); ?>"
 		poster="<?php echo esc_url( $poster_url ); ?>"
 		controls<?php echo esc_attr( $video_attrs ); ?>

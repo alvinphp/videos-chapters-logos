@@ -3,7 +3,7 @@
  * Administrador de videos.
  *
  * @package Videos_Chapters_Logos
- * @since 1.2.0
+ * @since 1.4
  */
 
 require_once plugin_dir_path( __FILE__ ) . '../functions/database.php';
@@ -35,6 +35,7 @@ $datos = vidchlog_get_video();
 				<th scope="col" class="manage-column column-age">Autoplay</th>
 				<th scope="col" class="manage-column column-age">Muted</th>
 				<th scope="col" class="manage-column column-age">Loop</th>
+				<th scope="col" class="manage-column column-age">Style</th>
 				<th scope="col" class="manage-column column-age">Shortcode</th>
 				<th scope="col" class="manage-column column-age">Actions</th>
 			</tr>
@@ -69,6 +70,10 @@ $datos = vidchlog_get_video();
 
 					<td>
 						<?php echo 1 === (int) $videos->loop_video ? 'Sí' : 'No'; ?>
+					</td>
+
+					<td>
+						<?php echo esc_html( $videos->estilo ); ?>
 					</td>
 
 					<td>

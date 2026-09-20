@@ -44,6 +44,7 @@ add_action( 'admin_menu', 'vidchlog_agregar_menu' );
  * Carga los scripts JavaScript del administrador.
  */
 require_once __DIR__ . '/../functions/adminjs.php';
+require_once plugin_dir_path( __FILE__ ) . '../functions/database.php';
 
 /**
  * Muestra la página de videos guardados.
@@ -73,7 +74,7 @@ function vidchlog_pagina_principal() {
 		)
 	) {
 		global $wpdb;
-
+		$tabla_style       = $wpdb->prefix . 'estilos';
 		$tabla_videos      = $wpdb->prefix . 'video';
 		$tabla_marcaciones = $wpdb->prefix . 'marcaciones';
 
@@ -120,6 +121,11 @@ function vidchlog_pagina_principal() {
 		$muted      = isset( $_POST['vidchlog_muted'] ) ? 1 : 0;
 		$loop_video = isset( $_POST['vidchlog_loop'] ) ? 1 : 0;
 
+		// recibiendo el post de estilos.
+		$id_estilo = isset( $_POST['estilo'] )
+		? absint( $_POST['estilo'] )
+		: 0;
+
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Inserción necesaria en la tabla propia del plugin.
 		$consulta = $wpdb->insert(
 			$tabla_videos,
@@ -130,11 +136,13 @@ function vidchlog_pagina_principal() {
 				'autoplay'   => $autoplay,
 				'muted'      => $muted,
 				'loop_video' => $loop_video,
+				'id_estilo'  => $id_estilo,
 			),
 			array(
 				'%s',
 				'%s',
 				'%s',
+				'%d',
 				'%d',
 				'%d',
 				'%d',
@@ -202,11 +210,11 @@ function vidchlog_pagina_principal() {
 
 		if ( false !== $consulta && true === $marcaciones_correctas ) {
 			echo '<div class="notice notice-success">
-                <p>Video and markers saved successfully.</p>
+                <p>Video, style and markers saved successfully.</p>
             </div>';
 		} else {
 			echo '<div class="notice notice-error">
-                <p>Error saving the video or markers.</p>
+                <p>Error saving the video, style or markers.</p>
             </div>';
 		}
 	}
@@ -261,6 +269,15 @@ function vidchlog_pagina_principal() {
 				>
 			</div>
 
+			<hr>
+			<h2>Style Skins</h2>
+			<select name="estilo" id="estilo">
+				<?php $estilo = vidchlog_get_style(); ?>
+				<?php foreach ( $estilo as $estilos ) : ?>
+				<option value="<?php echo esc_attr( $estilos->id_estilo ); ?>">
+					<?php echo esc_html( $estilos->estilo ); ?>
+				<?php endforeach; ?>
+			</select>
 			<hr>
 
 			<div class="vidchlog-controls">

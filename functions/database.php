@@ -20,6 +20,12 @@ define(
 	$wpdb->prefix . 'marcaciones'
 );
 
+define(
+	'VIDCHLOG_TABLA_STYLE',
+	$wpdb->prefix . 'estilos'
+);
+
+
 
 /**
  * Crear las tablas del plugin.
@@ -30,10 +36,55 @@ function vidchlog_crear_tablas() {
 
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-	$charset_collate = $wpdb->get_charset_collate();
-
+	$charset_collate   = $wpdb->get_charset_collate();
+	$tabla_estilos     = VIDCHLOG_TABLA_STYLE;
 	$tabla_videos      = VIDCHLOG_TABLA_VIDEOS;
 	$tabla_marcaciones = VIDCHLOG_TABLA_MARCACIONES;
+
+	/*
+	 * Tabla de estilos.
+	 */
+	$sql_estilos = "CREATE TABLE $tabla_estilos (
+	    id_estilo BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	    estilo VARCHAR(255) NULL,
+	    PRIMARY KEY( id_estilo)
+	) ENGINE=InnoDB $charset_collate;";
+
+	dbDelta( $sql_estilos );
+	// insertando estilos predeterminado.
+	$estilos_predeterminados = array(
+		'default',
+		'vjs-theme-city',
+		'vjs-theme-fantasy',
+		'vjs-theme-forest',
+		'vjs-theme-sea',
+	);
+	// recorriendo el array.
+	foreach ( $estilos_predeterminados as $estilo ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$exist = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT id_estilo
+		     FROM %i
+		     WHERE estilo = %s',
+				$tabla_estilos,
+				$estilo
+			)
+		);
+
+		if ( ! $exist ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->insert(
+				$tabla_estilos,
+				array(
+					'estilo' => $estilo,
+				),
+				array(
+					'%s',
+				)
+			);
+		}
+	}
 
 	/*
 	 * Tabla de videos.
@@ -46,7 +97,14 @@ function vidchlog_crear_tablas() {
         autoplay TINYINT(1) NOT NULL DEFAULT 0,
         muted TINYINT(1) NOT NULL DEFAULT 0,
         loop_video TINYINT(1) NOT NULL DEFAULT 0,
-        PRIMARY KEY  (idvideo)
+        id_estilo BIGINT UNSIGNED NULL,
+        PRIMARY KEY  (idvideo),
+        KEY idx_id_estilo (id_estilo),
+        CONSTRAINT fk_videos_estilo
+        FOREIGN KEY (id_estilo)
+        REFERENCES $tabla_estilos(id_estilo)
+        ON DELETE SET NULL 
+        ON UPDATE CASCADE
     ) ENGINE=InnoDB $charset_collate;";
 
 	dbDelta( $sql_videos );
@@ -115,24 +173,29 @@ function vidchlog_seleccionar_videos() {
 function vidchlog_get_video() {
 
 	global $wpdb;
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$resultados = $wpdb->get_results(
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$results = $wpdb->get_results(
 		$wpdb->prepare(
 			'SELECT
-                idvideo,
-                video,
-                logo,
-                poster,
-                autoplay,
-                muted,
-                loop_video
-            FROM %i
-            ORDER BY idvideo ASC',
-			VIDCHLOG_TABLA_VIDEOS
+				v.idvideo,
+				v.video,
+				v.logo,
+				v.poster,
+				v.autoplay,
+				v.muted,
+				v.loop_video,
+				v.id_estilo,
+				e.estilo
+			FROM %i AS v
+			LEFT JOIN %i AS e
+				ON v.id_estilo = e.id_estilo
+			ORDER BY v.idvideo ASC',
+			VIDCHLOG_TABLA_VIDEOS,
+			VIDCHLOG_TABLA_STYLE
 		)
 	);
 
-	return $resultados;
+	return $results;
 }
 
 
@@ -145,23 +208,30 @@ function vidchlog_get_video() {
 function vidchlog_get_video_by_id( $idvideo ) {
 
 	global $wpdb;
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	return $wpdb->get_row(
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$resultado = $wpdb->get_row(
 		$wpdb->prepare(
 			'SELECT
-                idvideo,
-                video,
-                logo,
-                poster,
-                autoplay,
-                muted,
-                loop_video
-            FROM %i
-            WHERE idvideo = %d',
+				v.idvideo,
+				v.video,
+				v.logo,
+				v.poster,
+				v.autoplay,
+				v.muted,
+				v.loop_video,
+				v.id_estilo,
+				e.estilo
+			FROM %i AS v
+			LEFT JOIN %i AS e
+				ON v.id_estilo = e.id_estilo
+			WHERE v.idvideo = %d',
 			VIDCHLOG_TABLA_VIDEOS,
+			VIDCHLOG_TABLA_STYLE,
 			$idvideo
 		)
 	);
+
+	return $resultado;
 }
 
 
@@ -248,4 +318,25 @@ function vidchlog_procesar_delete_video() {
 	);
 
 	exit;
+}
+
+/**
+ * Obtener los estilos.
+ *
+ * @return array
+ */
+function vidchlog_get_style() {
+
+	global $wpdb;
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$estilos = $wpdb->get_results(
+		$wpdb->prepare(
+			'SELECT id_estilo, estilo
+			FROM %i
+			ORDER BY id_estilo ASC',
+			VIDCHLOG_TABLA_STYLE
+		)
+	);
+
+	return $estilos;
 }

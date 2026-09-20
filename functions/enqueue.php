@@ -37,6 +37,34 @@ function vidchlog_frontend_assets() {
 			array( 'video-js-css' ),
 			'1.0'
 		);
+
+		wp_enqueue_style(
+			'sea-skin',
+			$plugin_url . 'assets/css/sea-skin.css',
+			array( 'video-js-css' ),
+			'1.0'
+		);
+
+		wp_enqueue_style(
+			'theme-fantasy-skin',
+			$plugin_url . 'assets/css/theme-skin-fantasy.css',
+			array( 'video-js-css' ),
+			'1.0'
+		);
+
+		wp_enqueue_style(
+			'theme-city-skin',
+			$plugin_url . 'assets/css/theme-skin-city.css',
+			array( 'video-js-css' ),
+			'1.0'
+		);
+
+		wp_enqueue_style(
+			'forest-skin',
+			$plugin_url . 'assets/css/forest-skin.css',
+			array( 'video-js-css' ),
+			'1.0'
+		);
 	}
 }
 add_action( 'wp_enqueue_scripts', 'vidchlog_frontend_assets' );
