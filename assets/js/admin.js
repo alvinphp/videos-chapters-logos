@@ -11,14 +11,14 @@ jQuery(document).ready(function($) {
                     name="marker_time[]" 
                     placeholder="00:00" 
                     style="margin-right: 10px;" 
-                    required
+                    
                 >
                 <input 
                     type="text" 
                     name="marker_title[]" 
                     placeholder="Título de la marcación" 
                     class="regular-text" 
-                    required
+                    
                 >
             </div>
         `;
@@ -37,6 +37,14 @@ jQuery(document).ready(function($) {
     });
 // Validación para el formulario
     $('form').on('submit', function(e) {
+        
+        // Si el checkbox está marcado, no validar marcaciones.
+        if ($('#check').is(':checked')) {
+          return;
+        }
+
+
+
         var camposVacios = false;
 
         // Revisamos cada input de tiempo y título dinámico

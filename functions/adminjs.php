@@ -24,6 +24,14 @@ function vidchlog_cargar_admin_js( $hook ) {
 		time(),
 		true
 	);
+
+	wp_enqueue_script(
+		'vidchlog-admin-toggle',
+		plugin_dir_url( __FILE__ ) . '../assets/js/checkbox-toggle.js',
+		array(),
+		'1.0',
+		true
+	);
 }
 
 add_action( 'admin_enqueue_scripts', 'vidchlog_cargar_admin_js' );

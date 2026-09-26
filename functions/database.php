@@ -116,7 +116,7 @@ function vidchlog_crear_tablas() {
         idmarkers BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         idvideo BIGINT UNSIGNED NOT NULL,
         tiempo INT UNSIGNED NOT NULL,
-        titulo VARCHAR(255) NULL,
+        titulo VARCHAR(255) NOT NULL,
         PRIMARY KEY  (idmarkers),
         KEY idx_idvideo (idvideo),
         CONSTRAINT fk_marcaciones_video

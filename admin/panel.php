@@ -74,12 +74,17 @@ function vidchlog_pagina_principal() {
 		)
 	) {
 		global $wpdb;
-		$tabla_style       = $wpdb->prefix . 'estilos';
+
 		$tabla_videos      = $wpdb->prefix . 'video';
 		$tabla_marcaciones = $wpdb->prefix . 'marcaciones';
 
+		/*
+		 * Determina si el video se guardará sin logo ni marcadores.
+		 */
+		$sin_logo = isset( $_POST['sin_logo'] );
+
 		$video = isset( $_FILES['archivo_video'] )
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
 			? $_FILES['archivo_video']
 			: array();
 
@@ -92,7 +97,7 @@ function vidchlog_pagina_principal() {
 			: '';
 
 		$logo = isset( $_FILES['archivo_logo'] )
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
 			? $_FILES['archivo_logo']
 			: array();
 
@@ -105,7 +110,7 @@ function vidchlog_pagina_principal() {
 			: '';
 
 		$poster = isset( $_FILES['archivo_poster'] )
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
 			? $_FILES['archivo_poster']
 			: array();
 
@@ -121,17 +126,19 @@ function vidchlog_pagina_principal() {
 		$muted      = isset( $_POST['vidchlog_muted'] ) ? 1 : 0;
 		$loop_video = isset( $_POST['vidchlog_loop'] ) ? 1 : 0;
 
-		// recibiendo el post de estilos.
+		/*
+		 * Recibe el estilo seleccionado.
+		 */
 		$id_estilo = isset( $_POST['estilo'] )
-		? absint( $_POST['estilo'] )
-		: 0;
+			? absint( $_POST['estilo'] )
+			: 0;
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Inserción necesaria en la tabla propia del plugin.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Inserción necesaria en la tabla propia del plugin.
 		$consulta = $wpdb->insert(
 			$tabla_videos,
 			array(
 				'video'      => $nombre_video,
-				'logo'       => $nombre_logo,
+				'logo'       => $sin_logo ? '' : $nombre_logo,
 				'poster'     => $nombre_poster,
 				'autoplay'   => $autoplay,
 				'muted'      => $muted,
@@ -151,6 +158,9 @@ function vidchlog_pagina_principal() {
 
 		$id_video = $wpdb->insert_id;
 
+		/*
+		 * Obtiene los marcadores enviados por el formulario.
+		 */
 		$tiempo = isset( $_POST['marker_time'] ) && is_array( $_POST['marker_time'] )
 			? array_map(
 				'sanitize_text_field',
@@ -167,58 +177,85 @@ function vidchlog_pagina_principal() {
 
 		$marcaciones_correctas = true;
 
-		if ( count( $tiempo ) !== count( $titulo ) ) {
-			$marcaciones_correctas = false;
-		} else {
-			foreach ( $tiempo as $indice => $tiempo_actual ) {
+		/*
+		 * Solo valida y guarda marcadores cuando el checkbox
+		 * "Without logo and markers" NO está seleccionado.
+		 */
+		if ( ! $sin_logo ) {
 
-				if ( ! preg_match( '/^\d{1,2}:[0-5]\d$/', $tiempo_actual ) ) {
-					$marcaciones_correctas = false;
-					break;
-				}
+			if ( count( $tiempo ) !== count( $titulo ) ) {
+				$marcaciones_correctas = false;
+			} else {
+				foreach ( $tiempo as $indice => $tiempo_actual ) {
 
-				$titulo_marcacion = $titulo[ $indice ] ?? '';
+					if ( ! preg_match( '/^\d{1,2}:[0-5]\d$/', $tiempo_actual ) ) {
+						$marcaciones_correctas = false;
+						break;
+					}
 
-				if ( empty( trim( $titulo_marcacion ) ) ) {
-					$marcaciones_correctas = false;
-					break;
-				}
+					$titulo_marcacion = $titulo[ $indice ] ?? '';
 
-				$tiempos_segundos = vidchlog_convert_to_seconds( $tiempo_actual );
+					if ( empty( trim( $titulo_marcacion ) ) ) {
+						$marcaciones_correctas = false;
+						break;
+					}
 
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Inserción necesaria en la tabla propia del plugin.
-				$consulta_marcacion = $wpdb->insert(
-					$tabla_marcaciones,
-					array(
-						'idvideo' => $id_video,
-						'tiempo'  => $tiempos_segundos,
-						'titulo'  => $titulo_marcacion,
-					),
-					array(
-						'%d',
-						'%d',
-						'%s',
-					)
-				);
+					$tiempos_segundos = vidchlog_convert_to_seconds( $tiempo_actual );
 
-				if ( false === $consulta_marcacion ) {
-					$marcaciones_correctas = false;
-					break;
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Inserción necesaria en la tabla propia del plugin.
+					$consulta_marcacion = $wpdb->insert(
+						$tabla_marcaciones,
+						array(
+							'idvideo' => $id_video,
+							'tiempo'  => $tiempos_segundos,
+							'titulo'  => $titulo_marcacion,
+						),
+						array(
+							'%d',
+							'%d',
+							'%s',
+						)
+					);
+
+					if ( false === $consulta_marcacion ) {
+						$marcaciones_correctas = false;
+						break;
+					}
 				}
 			}
 		}
 
-		if ( false !== $consulta && true === $marcaciones_correctas ) {
-			echo '<div class="notice notice-success">
-                <p>Video, style and markers saved successfully.</p>
-            </div>';
+		/*
+		 * Muestra el mensaje correspondiente al resultado.
+		 */
+		if ( false !== $consulta && $marcaciones_correctas ) {
+
+			if ( $sin_logo ) {
+
+				echo '<div id="notice-logo" class="notice notice-success">
+					<p>Video and style saved successfully.</p>
+				</div>';
+
+			} else {
+
+				echo '<div id="consulta-exit" class="notice notice-success">
+					<p>Video, style and markers saved successfully.</p>
+				</div>';
+			}
 		} else {
-			echo '<div class="notice notice-error">
-                <p>Error saving the video, style or markers.</p>
-            </div>';
+
+			echo '<div id="consulta-error" class="notice notice-error">
+				<p>Error saving the video, style or markers.</p>
+			</div>';
 		}
 	}
 	?>
+
+	<style>
+		.ocultar {
+			display: none;
+		}
+	</style>
 
 	<div class="wrap">
 
@@ -234,6 +271,16 @@ function vidchlog_pagina_principal() {
 
 			<?php wp_nonce_field( 'vidchlog_guardar_video', 'vidchlog_nonce' ); ?>
 
+			<label for="check">
+				<input
+					type="checkbox"
+					name="sin_logo"
+					id="check"
+					<?php checked( isset( $_POST['sin_logo'] ) ); ?>
+				>
+				Without logo and markers
+			</label>
+
 			<h2>Add Video</h2>
 
 			<div class="campo-form">
@@ -247,14 +294,13 @@ function vidchlog_pagina_principal() {
 				>
 			</div>
 
-			<div class="campo-form">
-				<label for="logo-archivo">Upload Logo:</label>
+			<div class="campo-form" id="logo-archivo">
+				<label for="logo">Upload Logo:</label>
 				<input
 					type="file"
-					id="logo-archivo"
+					id="logo"
 					name="archivo_logo"
 					accept="image/png,image/jpeg"
-					required
 				>
 			</div>
 
@@ -270,14 +316,21 @@ function vidchlog_pagina_principal() {
 			</div>
 
 			<hr>
+
 			<h2>Style Skins</h2>
+
 			<select name="estilo" id="estilo">
 				<?php $estilo = vidchlog_get_style(); ?>
+
 				<?php foreach ( $estilo as $estilos ) : ?>
-				<option value="<?php echo esc_attr( $estilos->id_estilo ); ?>">
-					<?php echo esc_html( $estilos->estilo ); ?>
+
+					<option value="<?php echo esc_attr( $estilos->id_estilo ); ?>">
+						<?php echo esc_html( $estilos->estilo ); ?>
+					</option>
+
 				<?php endforeach; ?>
 			</select>
+
 			<hr>
 
 			<div class="vidchlog-controls">
@@ -315,18 +368,18 @@ function vidchlog_pagina_principal() {
 
 			<hr>
 
-			<div class="vidchlog-markers">
+			<div id="markers" class="vidchlog-markers">
 
 				<h2>Markers</h2>
 
 				<div id="vidchlog-markers-container">
 
 					<div class="vidchlog-marker">
+
 						<input
 							type="text"
 							name="marker_time[]"
 							placeholder="00:00"
-							required
 						>
 
 						<input
@@ -334,8 +387,8 @@ function vidchlog_pagina_principal() {
 							name="marker_title[]"
 							placeholder="Chapter Title"
 							class="regular-text"
-							required
 						>
+
 					</div>
 
 				</div>
@@ -376,3 +429,4 @@ function vidchlog_pagina_principal() {
 
 	<?php
 }
+

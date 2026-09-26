@@ -162,10 +162,16 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 		__FILE__
 	);
 
-	$logo_url = plugins_url(
-		'assets/img/' . $logo_file,
-		__FILE__
-	);
+	$logo_url = '';
+
+	if ( ! empty( $logo_file ) ) {
+
+		$logo_url = plugins_url(
+			'assets/img/' . $logo_file,
+			__FILE__
+		);
+
+	}
 
 	$poster_url = plugins_url(
 		'assets/img/' . $poster_file,
