@@ -59,6 +59,9 @@ Added widget support.
 1.4
 Added styles to the video player skin.
 
+1.5
+Adapted the video player to use native Video.js integration.
+
 
 
 ---
