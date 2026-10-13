@@ -23,3 +23,96 @@ function vidchlog_convert_to_seconds( $time ) {
 	}
 	return intval( $time );
 }
+
+/**
+ * Funcion para convertir de segundos a minutos.
+ *
+ * @param int|string $time tiempo en minutos.
+ * @return mixed
+ */
+function vidchlog_convert_to_minute_seconds( $time ) {
+	$horas             = floor( $time / 60 );
+	$minutos_restantes = $time % 60;
+	$formato           = sprintf( '%d:%02d', $horas, $minutos_restantes );
+	return $formato;
+}
+
+/**
+ * Procesa la subida o gestión de un video en el sistema.
+ *
+ * @param array $archivo Datos del archivo recibido (ej. $_FILES['video']).
+ * @return int|false ID del registro.
+ */
+function vidchlog_subir_video( $archivo ) {
+	if ( empty( $archivo['name'] ) ) {
+		return false;
+	}
+
+	$nombre = sanitize_file_name( $archivo['name'] );
+
+	$directorio = plugin_dir_path( __DIR__ ) . 'assets/video/';
+
+	if ( ! file_exists( $directorio ) ) {
+		wp_mkdir_p( $directorio );
+	}
+
+	$destino = $directorio . $nombre;
+
+	if ( move_uploaded_file( $archivo['tmp_name'], $destino ) ) {
+		return $nombre;
+	}
+		return false;
+}
+
+/**
+ * Procesa la subida del logo a la carpeta img del plugin.
+ *
+ * @param array $archivo Datos del archivo recibido (ej. $_FILES['logo']).
+ * @return int|false ID del registro.
+ */
+function vidchlog_subir_logo( $archivo ) {
+	if ( empty( $archivo['name'] ) ) {
+		return false;
+	}
+
+	$nombre = sanitize_file_name( $archivo['name'] );
+
+	$directorio = plugin_dir_path( __DIR__ ) . 'assets/img/';
+
+	if ( ! file_exists( $directorio ) ) {
+		wp_mkdir_p( $directorio );
+	}
+
+	$destino = $directorio . $nombre;
+
+	if ( move_uploaded_file( $archivo['tmp_name'], $destino ) ) {
+		return $nombre;
+	}
+		return false;
+}
+/**
+ * Procesa la subida del poster a la carpeta img del plugin.
+ *
+ * @param array $archivo Datos del archivo recibido (ej. $_FILES['poster']).
+ * @return int|false ID del registro.
+ */
+function vidchlog_subir_poster( $archivo ) {
+	if ( empty( $archivo['name'] ) ) {
+		return false;
+	}
+
+	$nombre = sanitize_file_name( $archivo['name'] );
+
+	$directorio = plugin_dir_path( __DIR__ ) . 'assets/img/';
+
+	if ( ! file_exists( $directorio ) ) {
+		wp_mkdir_p( $directorio );
+	}
+
+	$destino = $directorio . $nombre;
+
+	if ( move_uploaded_file( $archivo['tmp_name'], $destino ) ) {
+		return $nombre;
+	}
+		return false;
+}
