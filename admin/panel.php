@@ -5,6 +5,10 @@
  * @package Videos_Chapters_Logos
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Agrega el menú del plugin al panel de administración.
  */
@@ -84,43 +88,55 @@ function vidchlog_pagina_principal() {
 		$sin_logo = isset( $_POST['sin_logo'] );
 
 		$video = isset( $_FILES['archivo_video'] )
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
-			? $_FILES['archivo_video']
-			: array();
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
+		? $_FILES['archivo_video']
+		: array();
 
 		if ( ! is_array( $video ) ) {
 			$video = array();
 		}
 
-		$nombre_video = isset( $video['name'] )
-			? sanitize_file_name( $video['name'] )
-			: '';
-
+		$nombre_video = vidchlog_subir_video( $video );
+		if ( false === $nombre_video ) {
+			wp_die( 'No se pudo subir el video.' );
+		}
+		// -----------------------------------------
 		$logo = isset( $_FILES['archivo_logo'] )
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
-			? $_FILES['archivo_logo']
-			: array();
+	    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
+		? $_FILES['archivo_logo']
+		: array();
 
 		if ( ! is_array( $logo ) ) {
 			$logo = array();
 		}
 
-		$nombre_logo = isset( $logo['name'] )
-			? sanitize_file_name( $logo['name'] )
-			: '';
+		$nombre_logo = '';
+
+		if ( ! $sin_logo ) {
+
+			$nombre_logo = vidchlog_subir_logo( $logo );
+
+			if ( false === $nombre_logo ) {
+				wp_die( 'No se pudo subir el logo.' );
+			}
+		}
+		// -------------------------------
 
 		$poster = isset( $_FILES['archivo_poster'] )
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
-			? $_FILES['archivo_poster']
-			: array();
+	    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Se valida la estructura y se sanitiza el nombre del archivo.
+		? $_FILES['archivo_poster']
+		: array();
 
 		if ( ! is_array( $poster ) ) {
 			$poster = array();
 		}
 
-		$nombre_poster = isset( $poster['name'] )
-			? sanitize_file_name( $poster['name'] )
-			: '';
+		$nombre_poster = vidchlog_subir_poster( $poster );
+
+		if ( false === $nombre_poster ) {
+			wp_die( 'No se pudo subir el poster.' );
+		}
+		// -----------------------------------------------
 
 		$autoplay   = isset( $_POST['vidchlog_autoplay'] ) ? 1 : 0;
 		$muted      = isset( $_POST['vidchlog_muted'] ) ? 1 : 0;
@@ -255,11 +271,29 @@ function vidchlog_pagina_principal() {
 		.ocultar {
 			display: none;
 		}
+		.postbox .inside h2, .wrap [class$=icon32]+h2, .wrap h1, .wrap>h2:first-child {
+			font-size: 23px;
+			font-weight: 700;
+			margin: 0;
+			padding: 9px 0 4px;
+			line-height: 1.3;
+		}
+		.encabezado {
+			font-weight: 700;
+			color: #3858e9;
+		}
+
+		.vidchlog-file.archivo-seleccionado {
+			color: green !important;
+		} 
 	</style>
+	<?php
+	require_once dirname( __DIR__ ) . '/include/color-input.php';
+	?>
 
 	<div class="wrap">
 
-		<h1>Video Configuration</h1>
+		<h1 class="encabezado">Video Configuration</h1>
 
 		<div style="text-align: right;">
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=admin_videos' ) ); ?>">
@@ -281,12 +315,13 @@ function vidchlog_pagina_principal() {
 				Without logo and markers
 			</label>
 
-			<h2>Add Video</h2>
+			<h2 class="encabezado">Add Video</h2>
 
 			<div class="campo-form">
 				<label for="video-archivo">Upload MP4 video:</label>
 				<input
 					type="file"
+					class="vidchlog-file"
 					id="video-archivo"
 					name="archivo_video"
 					accept="video/mp4,video/webm"
@@ -298,6 +333,7 @@ function vidchlog_pagina_principal() {
 				<label for="logo">Upload Logo:</label>
 				<input
 					type="file"
+					class="vidchlog-file"
 					id="logo"
 					name="archivo_logo"
 					accept="image/png,image/jpeg"
@@ -308,6 +344,7 @@ function vidchlog_pagina_principal() {
 				<label for="poster-archivo">Upload Poster:</label>
 				<input
 					type="file"
+					class="vidchlog-file"
 					id="poster-archivo"
 					name="archivo_poster"
 					accept="image/png,image/jpeg"
@@ -317,7 +354,7 @@ function vidchlog_pagina_principal() {
 
 			<hr>
 
-			<h2>Style Skins</h2>
+			<h2 class="encabezado">Style Skins</h2>
 
 			<select name="estilo" id="estilo">
 				<?php $estilo = vidchlog_get_style(); ?>
@@ -335,7 +372,7 @@ function vidchlog_pagina_principal() {
 
 			<div class="vidchlog-controls">
 
-				<h2>Video Player Controls</h2>
+				<h2 class="encabezado">Video Player Controls</h2>
 
 				<label>
 					<input
@@ -370,7 +407,7 @@ function vidchlog_pagina_principal() {
 
 			<div id="markers" class="vidchlog-markers">
 
-				<h2>Markers</h2>
+				<h2 class="encabezado">Markers</h2>
 
 				<div id="vidchlog-markers-container">
 

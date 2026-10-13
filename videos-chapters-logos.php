@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Videos Chapters & Logos
  * Description: Plugin that displays an MP4 video with a logo and markers.
- * Version: 1.4
+ * Version: 1.6
  * Author: alvingil
  * Text Domain: videos-chapters-logos
  * Domain Path: /languages
@@ -26,9 +26,6 @@ require_once plugin_dir_path( __FILE__ ) . 'functions/database.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/panel.php';
 require_once plugin_dir_path( __FILE__ ) . 'widget/class-vidchlog-video-widget.php';
 
-/*
- * Crear las tablas al activar el plugin.
- */
 register_activation_hook(
 	__FILE__,
 	'vidchlog_crear_tablas'
@@ -41,6 +38,14 @@ register_activation_hook(
 add_action(
 	'admin_post_vidchlog_delete_video',
 	'vidchlog_procesar_delete_video'
+);
+
+/*
+ * Procesar actualización de videos.
+ */
+add_action(
+	'admin_post_vidchlog_update_video',
+	'vidchlog_procesar_update_video'
 );
 
 /**
@@ -89,6 +94,7 @@ function vidchlog_videos_chapters_logos_shortcode( $atts ) {
 		'1.0',
 		true
 	);
+
 	// ==============================================================================
 
 	/*
