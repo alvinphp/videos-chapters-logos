@@ -62,6 +62,9 @@ Added styles to the video player skin.
 1.5
 Adapted the video player to use native Video.js integration.
 
+1.6
+Fixed bugs and added new features for the video administration panel.
+
 
 
 ---
