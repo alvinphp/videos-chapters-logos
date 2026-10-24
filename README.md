@@ -61,8 +61,4 @@ Watch the official English video tutorial to learn how to install and configure 
 
 This plugin is licensed under the GPLv2 or later. You can redistribute and modify it under the terms of the GNU General Public License.
 
-## Author
 
-Alvin Gil
-
-[GitHub Repository](https://github.com/alvinphp/videos-chapters-logos)
