@@ -49,6 +49,7 @@ add_action( 'admin_menu', 'vidchlog_agregar_menu' );
  */
 require_once __DIR__ . '/../functions/adminjs.php';
 require_once plugin_dir_path( __FILE__ ) . '../functions/database.php';
+require_once plugin_dir_path( __FILE__ ) . '../functions/admin-enqueue.php';
 
 /**
  * Muestra la página de videos guardados.
@@ -69,6 +70,7 @@ function vidchlog_lista_videos() {
  */
 function vidchlog_pagina_principal() {
 	require_once plugin_dir_path( __FILE__ ) . '../functions/functions.php';
+	vidchlog_table_exist();
 
 	if (
 		isset( $_POST['vidchlog_guardar_video'], $_POST['vidchlog_nonce'] )
@@ -267,30 +269,6 @@ function vidchlog_pagina_principal() {
 	}
 	?>
 
-	<style>
-		.ocultar {
-			display: none;
-		}
-		.postbox .inside h2, .wrap [class$=icon32]+h2, .wrap h1, .wrap>h2:first-child {
-			font-size: 23px;
-			font-weight: 700;
-			margin: 0;
-			padding: 9px 0 4px;
-			line-height: 1.3;
-		}
-		.encabezado {
-			font-weight: 700;
-			color: #3858e9;
-		}
-
-		.vidchlog-file.archivo-seleccionado {
-			color: green !important;
-		} 
-	</style>
-	<?php
-	require_once dirname( __DIR__ ) . '/include/color-input.php';
-	?>
-
 	<div class="wrap">
 
 		<h1 class="encabezado">Video Configuration</h1>
@@ -357,7 +335,19 @@ function vidchlog_pagina_principal() {
 			<h2 class="encabezado">Style Skins</h2>
 
 			<select name="estilo" id="estilo">
-				<?php $estilo = vidchlog_get_style(); ?>
+				<?php $estilo = vidchlog_get_style(); 
+				//auxiliar por si falla la base de datos.
+				if (empty($estilo)) {
+				    $estilo = array(
+				    	 (object) array( 'id_estilo' => 1, 'estilo' => 'default' ),
+				    	 (object) array( 'id_estilo' => 2, 'estilo' => 'vjs-theme-city' ),
+				    	 (object) array( 'id_estilo' => 3, 'estilo' => 'vjs-theme-fantasy' ),
+				    	 (object) array( 'id_estilo' => 4, 'estilo' => 'vjs-theme-forest' ),
+				    	 (object) array( 'id_estilo' => 5, 'estilo' => 'vjs-theme-sea' ),
+
+				    );
+				}
+				?>
 
 				<?php foreach ( $estilo as $estilos ) : ?>
 

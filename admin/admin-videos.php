@@ -9,7 +9,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
+require_once dirname( __DIR__ ) . '/include/modal-update-video.php';
 require_once plugin_dir_path( __FILE__ ) . '../functions/database.php';
 require_once plugin_dir_path( __FILE__ ) . '../functions/functions.php';
 ?>
@@ -32,10 +32,6 @@ require_once plugin_dir_path( __FILE__ ) . '../functions/functions.php';
 	// incluimos tabla con datatable.
 	require_once dirname( __DIR__ ) . '/include/listado-videos.php';
 	?>
-
-<?php
-require_once dirname( __DIR__ ) . '/include/style-modal.php';
-?>
 
 <!--
 ====================================================
@@ -352,6 +348,4 @@ MODAL DE ACTUALIZACIÓN
 
 </div>
 
-<?php
-require_once dirname( __DIR__ ) . '/include/modal-update-video.php';
-?>
+

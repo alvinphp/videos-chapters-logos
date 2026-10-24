@@ -1,15 +1,4 @@
-<?php
-/**
- * Js para el color de input que no esta vacio.
- *
- * @package VideosChaptersLogos
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-?>
-<script>
+	
 	document.addEventListener('DOMContentLoaded', function () {
 
 		document.querySelectorAll('.vidchlog-file').forEach(function (input) {
@@ -27,4 +16,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 		});
 
 	});
-</script>

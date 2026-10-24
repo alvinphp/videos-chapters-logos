@@ -133,6 +133,21 @@ function vidchlog_crear_tablas() {
 	dbDelta( $sql_marcaciones );
 }
 
+/**
+ * Verificar si table existe si no la crea.
+ *
+ * @return array
+ */
+function vidchlog_table_exist(){
+    global $wpdb;
+    $tabla_videos = VIDCHLOG_TABLA_VIDEOS;
+    $existe = $wpdb->get_var( "SHOW TABLES LIKE '$tabla_videos'" );
+
+	if ( ! $existe ) {
+		vidchlog_crear_tablas();
+	}
+}
+
 
 /**
  * Seleccionar videos con sus marcaciones.

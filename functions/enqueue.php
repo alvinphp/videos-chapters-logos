@@ -65,6 +65,7 @@ function vidchlog_frontend_assets() {
 			array( 'video-js-css' ),
 			'1.0'
 		);
+
 	}
 }
 add_action( 'wp_enqueue_scripts', 'vidchlog_frontend_assets' );
