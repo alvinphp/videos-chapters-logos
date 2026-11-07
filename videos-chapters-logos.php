@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Videos Chapters & Logos
  * Description: Plugin that displays an MP4 video with a logo and markers.
- * Version: 1.6
+ * Version: 1.7
  * Author: alvingil
  * Text Domain: videos-chapters-logos
  * Domain Path: /languages
